@@ -33,7 +33,7 @@ st.write(
 @st.cache_resource
 def load_classification_model():
 
-    model_directory = "./ai_detector_model"
+    model_directory = "NishiNaseem982/ai-detector-model"
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_directory)
