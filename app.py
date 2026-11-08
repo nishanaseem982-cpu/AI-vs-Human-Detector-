@@ -52,7 +52,7 @@ def load_classification_model():
     model.eval()
 
     # Load actual training labels
-    labels_path = os.path.join(model_directory, "labels.json")
+    labels_path = "labels.json"
 
     with open(labels_path, "r", encoding="utf-8") as f:
         labels_map = json.load(f)
