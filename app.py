@@ -33,7 +33,7 @@ st.write(
 @st.cache_resource
 def load_classification_model():
 
-    model_directory = "NishiNaseem982/ai-detector-model"
+    model_directory = "Hello-SimpleAI/chatgpt-detector-roberta"
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_directory)
@@ -51,15 +51,10 @@ def load_classification_model():
     model.to(device)
     model.eval()
 
-    # Load actual training labels
-    labels_path = "labels.json"
+    # load labels directly from the model configration
+    labels_map = model.config.id2label
 
-    with open(labels_path, "r", encoding="utf-8") as f:
-        labels_map = json.load(f)
-
-    labels_map = {
-        int(key): value for key, value in labels_map.items()
-    }
+    
 
     return tokenizer, model, device, labels_map
 
