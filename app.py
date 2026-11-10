@@ -1,8 +1,10 @@
 
 import streamlit as st
 import torch
+import torch.nn.functional as F
 import json
 import os
+import re
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
@@ -147,3 +149,112 @@ if st.button("Analyze Text", type="primary"):
                 "This prediction is an estimate from the trained model, "
                 "not a guaranteed determination of authorship."
             )
+        if st.button("Analyze Text", type="primary"):
+
+    if user_input.strip() == "":
+
+        st.warning("Please enter some text before analyzing.")
+
+    else:
+
+        with st.spinner("Analyzing your text deeply..."):
+
+            # ============================================================
+            # A. SAFE CHUNKING PIPELINE
+            # ============================================================
+            words = user_input.split()
+            chunk_size = 150  
+            chunks = [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+            
+            ai_votes = 0
+            human_votes = 0
+            total_ai_prob = 0
+            
+            # Dynamic mapping check for the AI label key inside labels.json
+            ai_class_id = 1
+            for key, val in labels_map.items():
+                if "AI" in val.upper():
+                    ai_class_id = key
+                    break
+
+            for chunk in chunks:
+                # Tokenization bounds matched cleanly to your original settings
+                inputs = tokenizer(
+                    chunk,
+                    return_tensors="pt",
+                    truncation=True,
+                    padding=True,
+                    max_length=256
+                )
+
+                # Move inputs to your active device
+                inputs = {
+                    key: value.to(device)
+                    for key, value in inputs.items()
+                }
+
+                with torch.no_grad():
+                    outputs = model(**inputs)
+                    probs = F.softmax(outputs.logits, dim=-1)
+                    
+                    predicted_class_id = torch.argmax(outputs.logits, dim=-1).item()
+                    chunk_ai_prob = probs[0][ai_class_id].item() * 100 
+                
+                total_ai_prob += chunk_ai_prob
+                if predicted_class_id == ai_class_id:
+                    ai_votes += 1
+                else:
+                    human_votes += 1
+            
+            # Compute total probability distributions
+            final_ai_percentage = total_ai_prob / len(chunks)
+            
+        # ============================================================
+        # B. DYNAMIC METRICS DISPLAY
+        # ============================================================
+        st.write(" 📊 Classification Output:")
+        
+        # Display aggregate prediction gauges
+        st.metric(label="AI-Generated Probability", value=f"{final_ai_percentage:.1f}%")
+        st.progress(int(final_ai_percentage))
+        
+        # Map outcomes dynamically using your loaded label names
+        if final_ai_percentage > 50:
+            st.error(f"Prediction Verdict: Mostly {labels_map.get(ai_class_id, 'AI-Generated')}")
+        else:
+            human_class_id = 0 if ai_class_id == 1 else 1
+            st.success(f"Prediction Verdict: Mostly {labels_map.get(human_class_id, 'Human-Written')}")
+            
+        st.write(f"**Chunk Breakdown:** AI Chunks: {ai_votes}/{len(chunks)} | Human Chunks: {human_votes}/{len(chunks)}")
+        
+        # ============================================================
+        # C. ADVANCED FEATURE INSIGHTS (BUZZWORDS & GRAPHS)
+        # ============================================================
+        st.divider()
+        st.subheader("🔍 AI Buzzwords Found")
+        ai_buzzwords = ["delve", "tapestry", "moreover", "testament", "foster", "transformative", "multi-faceted", "landscape", "pivotal", "in conclusion", "furthermore"]
+        
+        found_words = [w for w in words if w.lower().strip(",.") in ai_buzzwords]
+        if found_words:
+            unique_found = set(found_words)
+            st.warning(f"AI structural trace indicators: `{', '.join(unique_found)}`")
+            st.caption(" Quick Fix: Swapping these common words helps smooth text flow patterns.")
+        else:
+            st.info("No explicit structural AI patterns isolated.")
+
+        st.divider()
+        st.subheader("📈 Text Flow & Sentence Length Analysis")
+        sentences = re.split(r'[.!?]+', user_input)
+        sentence_lengths = [len(s.split()) for s in sentences if len(s.strip()) > 0]
+        
+        if len(sentence_lengths) > 1:
+            st.write("Human pacing creates sudden changes in sentence lengths, whereas AI models tend to follow fixed sentence patterns.")
+            st.line_chart(sentence_lengths)
+        else:
+            st.info("Provide at least 2 sentences to activate the text structural variance maps.")
+
+        st.caption(
+            "This prediction is an estimate from the trained model, "
+            "not a guaranteed determination of authorship."
+        )
+
