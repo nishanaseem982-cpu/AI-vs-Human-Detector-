@@ -85,70 +85,7 @@ user_input = st.text_area(
     label="Enter your text here (maximum 256 tokens):",
     placeholder="Type or paste your paragraph here...",
     height=200
-)
-
-
-# ============================================================
-# 4. PREDICT AI OR HUMAN
-# ============================================================
-
-if st.button("Analyze Text", type="primary"):
-
-    if user_input.strip() == "":
-
-        st.warning("Please enter some text before analyzing.")
-
-    else:
-
-        with st.spinner("Analyzing your text..."):
-
-            # Tokenize input
-            inputs = tokenizer(
-                user_input,
-                return_tensors="pt",
-                truncation=True,
-                padding=True,
-                max_length=256
-            )
-
-            # Move inputs to same device as model
-            inputs = {
-                key: value.to(device)
-                for key, value in inputs.items()
-            }
-
-            # Model prediction
-            with torch.no_grad():
-
-                outputs = model(**inputs)
-
-            # Get predicted class
-            predicted_class_id = torch.argmax(
-                outputs.logits,
-                dim=-1
-            ).item()
-
-            # Convert class ID into actual label
-            predicted_label = labels_map.get(
-                predicted_class_id,
-                "Unknown Class"
-            )
-
-            # Display result
-            st.write("### Classification Output:")
-
-            if "AI" in predicted_label.upper():
-
-                st.error(f"Prediction: {predicted_label}")
-
-            else:
-
-                st.success(f"Prediction: {predicted_label}")
-
-            st.caption(
-                "This prediction is an estimate from the trained model, "
-                "not a guaranteed determination of authorship."
-            )
+)    
 
 if st.button("Analyze Text", type="primary"):
 
