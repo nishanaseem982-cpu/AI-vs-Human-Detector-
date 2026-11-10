@@ -149,7 +149,8 @@ if st.button("Analyze Text", type="primary"):
                 "This prediction is an estimate from the trained model, "
                 "not a guaranteed determination of authorship."
             )
-        if st.button("Analyze Text", type="primary"):
+
+if st.button("Analyze Text", type="primary"):
 
     if user_input.strip() == "":
 
@@ -212,7 +213,7 @@ if st.button("Analyze Text", type="primary"):
         # ============================================================
         # B. DYNAMIC METRICS DISPLAY
         # ============================================================
-        st.write(" 📊 Classification Output:")
+        st.write("### 📊 Classification Output:")
         
         # Display aggregate prediction gauges
         st.metric(label="AI-Generated Probability", value=f"{final_ai_percentage:.1f}%")
@@ -238,7 +239,7 @@ if st.button("Analyze Text", type="primary"):
         if found_words:
             unique_found = set(found_words)
             st.warning(f"AI structural trace indicators: `{', '.join(unique_found)}`")
-            st.caption(" Quick Fix: Swapping these common words helps smooth text flow patterns.")
+            st.caption("💡 Quick Fix: Swapping these common words helps smooth text flow patterns.")
         else:
             st.info("No explicit structural AI patterns isolated.")
 
@@ -257,4 +258,39 @@ if st.button("Analyze Text", type="primary"):
             "This prediction is an estimate from the trained model, "
             "not a guaranteed determination of authorship."
         )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
