@@ -25,3 +25,4 @@ This project is an AI vs Human Detector that identifies whether a given text or 
    ```bash
    python app.py
    ```
+
